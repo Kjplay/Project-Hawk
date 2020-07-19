@@ -1,0 +1,59 @@
+@keyframes clip {
+    from {
+        clip-path: inset(50% 0% 50% 0%);
+    }
+    to {
+        clip-path: inset(0% 0% 0% 0%);
+    }
+}
+@keyframes popUp-bounce {
+    0% { transform: scale(0); }
+    40% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+@keyframes fadeOutAndScale {
+    0% { 
+        transform: scale(1); 
+        opacity: 1;
+    }
+    90% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(0.7);
+        opacity: 0;
+    }
+}
+@keyframes fadeInAndScale {
+    0% { 
+        transform: scale(0.7); 
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+@keyframes dark-grey {
+    from {
+        filter: grayscale(0) brightness(1);
+    }
+    to {
+        filter: grayscale(0.5) brightness(0.5);
+    }
+}
+@keyframes wave {
+    0% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(-15deg);
+    }
+    75% {
+        transform: rotate(15deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}

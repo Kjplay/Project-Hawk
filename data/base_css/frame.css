@@ -1,0 +1,85 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  background-color: var(--bg3);
+  -webkit-app-region: no-drag;
+  min-height: 100vh;
+  display: block;
+  z-index: 999;
+}
+control-frame {
+  display: inline-block;
+  width: calc(100% - 6px);
+  height: calc(100vh - 30px);
+  min-height: calc(100vh - 30px);
+  -webkit-app-region: drag;
+  z-index: 999;
+  position: relative;
+}
+div#top-bar {
+  display: block;
+  width: 100%;
+  min-width: 100%;
+  top: 0px;
+  height: 22px;
+  min-height: 22px;
+  -webkit-app-region: drag;
+  z-index: 999;
+}
+
+win-controls {
+  display: flex;
+  justify-content: flex-end;
+  top: 0px;
+  right: 0px;
+  position: absolute;
+  height: 28px; 
+  width: auto;
+  -webkit-app-region: no-drag;
+}
+win-controls div {
+  font-size: 115%;
+  width: 40px;
+  display: inline-flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: row;
+  margin: 0;
+  height: 100%;
+  background-color: transparent;
+  transition: background-color 0.3s ease-in-out;
+}
+win-controls div span {
+  color: var(--text);
+  margin: auto;
+}
+win-controls div:not(#close):hover {
+  background-color: var(--trans-grey);
+  cursor: pointer;
+}
+win-controls div#close:hover {
+  background-color: var(--cancel-color);
+  cursor: pointer;
+}
+div#size {
+  padding: 3px 3px 3px 3px;
+  min-height: inherit;
+  min-width: inherit;
+  width: inherit;
+  height: inherit;
+  -webkit-app-region: no-drag;
+}
+main {
+  color: white;
+  font-family: "Lato", sans-serif;
+  font-size: 15px;
+  display: block; /* Default */
+  background-color: #1c1c1c;
+  border-radius: 11px;
+  overflow: hidden;
+  min-width: calc(100% - 6px);
+  width: calc(100% - 6px);
+  min-height: calc(100% - 11px);
+  height: calc(100% - 11px);
+  -webkit-app-region: no-drag;
+}

@@ -1,0 +1,40 @@
+{
+  "name": "project_hawk",
+  "productName": "Project Hawk",
+  "version": "0.2.0",
+  "description": "Text-game engine (similar to Twine 2)",
+  "main": "index.js",
+  "dependencies": {},
+  "icon": "build/app.ico",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --x64"
+  },
+  "repository": {
+    "type": "git",
+    "url": "false"
+  },
+  "keywords": [
+    "text-game"
+  ],
+  "author": "Jakub Jaruszewski",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^9.1.0",
+    "electron-builder": "^22.7.0"
+  },
+  "build": {
+    "appId": "com.electron.project_hawk",
+    "copyright": "Copyright © 2020 Jakub Jaruszewski",
+    "directories": {
+      "output": "dist/hawk"
+    },
+    "icon": "build/app.ico",
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "build/app.ico"
+    }
+  }
+}

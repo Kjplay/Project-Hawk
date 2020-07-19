@@ -1,0 +1,45 @@
+<link rel="stylesheet" href="../html_panels/menu/main.css">
+<div area="main">
+  <div class="my_stories">[lang: My_stories]:</div>
+  <hr class="big">
+  <div class="stories_container flex f-row f-start">
+  </div>
+</div>
+<div area="side">
+  <div class="center">
+    <canvas graphic="logo" height="140px" width="140px" style="margin-top: 15px;margin-bottom: 14px;"></canvas>
+    <div class="title">Project<br><b>Hawk</b></div>
+  </div>
+  <div class="center">
+    <div class="mrg"><a dialog="lol" href="../docs/PL/index.html">[lang: Instruction]</a></div>
+    <div class="mrg"><a dialog="api" href="../docs/PL/index.html">[lang: Api]</a></div>
+    <div class="mrg"><a panel="settings" href="#">[lang: Settings]</a></div>
+    <div class="mrg"><a dialog="authors" href="#">[lang: Authors]</a></div>
+  </div>
+</div>
+<div area="footer">
+  <div class="info-menu" style="opacity: 0;">
+    <div class="info-column">
+      <div class="text-line huge mrg-down">
+        <span class="bold grey">[lang: Title]: </span>
+        <span content="story_title"></span>
+      </div>
+      <div class="text-line huge">
+        <span class="bold grey">[lang: Passages_quantity]: </span>
+        <span content="passages_quantity"></span>
+      </div>
+    </div>
+    <div class="info-column">
+
+    </div>
+  </div>
+  <div class="edit-menu footer-menu">
+    <button dialog="bruh" class="big_footer" style="background-color: #005fb8;"><img src="../icons/read.svg"
+        class="font-big-square inverted" style="margin-left: 5px;"><span>Wczytaj z pliku</span></button>
+  </div>
+  <div class="edit-menu footer-menu">
+    <button dialog="new_story" class="big_footer" style="background-color: #00b76a;"><img src="../icons/add.svg"
+        class="font-big-square inverted" style="margin-left: 5px;"><span>[lang: New_story]</span></button>
+  </div>
+</div>
+<script type="module" src="../html_panels/menu/menu.mjs"></script>

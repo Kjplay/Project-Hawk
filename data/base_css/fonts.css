@@ -1,0 +1,25 @@
+@font-face {
+  font-family: 'source_code_pro';
+  src: url('../fonts/sourcecodepro.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Lato';
+  src: url('../fonts/Lato-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Fontello';
+  src: url('../fonts/fontello.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+.fontello {
+  font-family: 'Fontello';
+}
+div.bigger {
+  font-size: 30px;
+}

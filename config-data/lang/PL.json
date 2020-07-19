@@ -1,0 +1,32 @@
+{
+  "fullName": "Polski",
+  "code": "PL",
+  "data": {
+    "loading": "Ładowanie",
+    "main_window": "Okno główne",
+    "start": "Zaczynajmy",
+    "choose_lang": "Wybierz język",
+    "instruction": "Instrukcja",
+    "license": "Licencja",
+    "api": "API",
+    "authors": "Autorzy",
+    "ok": "OK",
+    "yes": "Tak",
+    "no": "Nie",
+    "cancel": "Anuluj",
+    "settings": "Ustawienia",
+    "new_story": "Nowa historia",
+    "play": "Graj",
+    "edit": "Edytuj",
+    "delete": "Usuń",
+    "my_stories": "Moje historie",
+    "title": "Tytuł",
+    "dialogs_error": "Nie udało się otworzyć dialogu",
+    "give_title": "Podaj tytuł",
+    "create": "Utwórz",
+    "sure_cancelling": "Czy na pewno chcesz anulować",
+    "sure": "Czy jesteś pewien",
+    "passages_quantity": "ilość pasaży",
+    "editor": "Edytor"
+  }
+}

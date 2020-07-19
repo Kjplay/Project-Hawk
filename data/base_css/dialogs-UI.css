@@ -1,0 +1,146 @@
+div.cover {
+  position: absolute;
+  left: 6px;
+  top: 3px;
+  display: grid;
+  min-width: calc(100% - 6px);
+  min-height: calc(100% - 11px);
+  place-items: center;
+  transition: opacity 0.2s ease;
+}
+#main_cover {
+  position: absolute;
+  left: 6px;
+  top: 3px;
+  display: grid;
+  min-width: calc(100% - 6px);
+  min-height: calc(100% - 11px);
+  place-items: center;
+  border: none;
+  transition: opacity 0.2s ease;
+  opacity: 0;
+}
+div.cover .popUp {
+  min-width: 600px;
+  width: 600px;
+  height: auto;
+  box-shadow: 4px 4px 20px 2px black;
+  background-color: #191919;
+  border-radius: 9px;
+  border: none;
+  font-family: "Lato"; 
+}
+div.cover .popUp .closebar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  min-width: 100%;
+  min-height: 50px;
+  height: 50px;
+  overflow: hidden;
+  border-bottom: var(--main-color) 4px solid;
+  position: relative;
+}
+div.cover .popUp .closebar .close-icon {
+  width: 30px;
+  height: 30px;
+  margin: 10px 10px 10px 10px;
+  border-radius: 5px;
+  color: var(--text);
+  transition: background-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+}
+div.cover .popUp .closebar .close-icon span {
+  margin: auto;
+  font-size: 130%;
+}
+div.cover .popUp .closebar .close-icon:hover {
+  background-color: var(--cancel-color);
+  box-shadow: 2px 2px 7px rgb(0, 0, 0);
+  cursor: pointer;
+}
+div.cover .popUp .closebar .close-icon:focus {
+  background-color: var(--cancel-color);
+  box-shadow: 2px 2px 7px rgb(0, 0, 0);
+  transform: scale(1.1);
+  outline: none;
+}
+div.cover .popUp .content {
+  font-family: "Lato";
+  font-size: 20px;
+  padding: 15px 18px 10px 18px;
+  display: block;
+  color: var(--text);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+div.cover .popUp .content.superPadding {
+  padding: 15px 18px 15px 18px;
+}
+div.cover .popUp .buttons {
+  border-top: 2px solid var(--main-color);
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  width: 100%;
+  height: fit-content;
+}
+div.cover .popUp .buttons button {
+  width: 70px;
+  height: 30px;
+  box-shadow: 0px 0px 3px black;
+  background-color: #0f0f0f;
+  border: none;
+  color: var(--text);
+  border-radius: 3px;
+  transition: background-color 0.4s ease, transform 0.4s ease;
+  margin: 9px 13px 9px 0;
+  cursor: pointer;
+}
+div.cover .popUp .buttons button:focus {
+  outline: none;
+  transform: scale(1.1);
+  filter: grayscale(0.5);
+}
+div.cover .popUp .buttons .btn_ok:hover {
+  background-color: var(--main-color);
+}
+div.cover .popUp .buttons .btn_cancel:hover {
+  background-color: var(--cancel-color);
+}
+div.popUp span.content {
+  position: relative;
+  left: 0;
+  top: 0;
+}
+div.subPop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100% - 14px);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent);
+  color: var(--text);
+  padding-top: 10px;
+  padding-bottom: 14px;
+  padding-left: 7px;
+  padding-right: 7px;
+  font-family: "Lato";
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+div.popContainer {
+  position: relative;
+  padding: 0;
+  margin: 0;
+}
+span.popTitle {
+  color: var(--text);
+  display: inline-block;
+  vertical-align: middle;
+  padding-left: 15px;
+  padding-top: 14px;
+  font-weight: bold;
+  font-size: 150%;
+}
+dialog-title {
+  display: none !important;
+}
