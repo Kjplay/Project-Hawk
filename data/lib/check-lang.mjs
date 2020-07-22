@@ -1,16 +1,18 @@
 "use strict";
 /*
-Module used for language operiations
+Module used for language operations
 @TO-DO:
-- useLang() -> cleaner code
-- Promise -> async function wherever possible
-- throwing instead of rejecting
-- add string splice to utils
+- useLang() -> cleaner code DONE
+- Promise -> async function wherever possible DONE
+- throwing instead of rejecting DONE
+- add string splice to utils DONE
 @FUTURE:
-- in ES 2020 use String.matchAll() - currently not supported in chromium
+- in ES 2020 use String.matchAll() DONE
 @CONSIDER:
-- use <lang code"EN" expression="something"></lang> elements for live changes
+- use <lang code"EN" expression="something"></lang> elements for live changes DONE
 - lang.translate() working with lang elements
+@NOTE:
+ - Config-checking is done in the main process, before window launches - we assume config is correct
 */
 //dependencies
 const userData = libs.req("userData");
@@ -20,149 +22,169 @@ const data = libs.req("data");
 //custom vars
 var loadedObj;
 var current;
+//constants
 const omitted = ["SCRIPT", "CANVAS", "IMG"]; //omitted html tags - have to be upper case
 const forbiddenAttrs = ["no-lang"]; //forbidden attributes - case sensitive
-const parsedPath = "config-data/lang-data.json";
-//utility
-var splice = function (string, idx, rem, str) {
-  return string.slice(0, idx) + str + string.slice(idx + Math.abs(rem));
-};
+const parsedPath = "config-data/lang-data.json"; //path to config
+const regex = /\[lang:\s*(\w{1,})\s*\]/gi; //regex for finding phrases
 
 //load Object to memory
 export async function loadObject(config) {
-  let { code, pack } = config;
+  let {
+    code,
+    pack
+  } = config;
   let obj = await data.requireJSON(joinPath("config-data/lang", pack));
   loadedObj = obj.data;
   current = code;
   return loadedObj;
 }
-//make list of all avabile languages and their packs
-export function langList() {
-  return new Promise(async function (resolve, reject) {
-    var packs = [];
-    var names = [];
-    var langConfig = await userData.requireJSON(parsedPath);
-    for (let p in langConfig.packages) {
-      packs.push(p.code);
-      names.push(p.name)
-    }
-    resolve({
-      codes: packs,
-      names: names
-    });
-  });
+//make a list of all avabile languages and their packs
+export async function langList() {
+  var packs = [];
+  var names = [];
+  var langConfig = await userData.requireJSON(parsedPath);
+  for (let p in langConfig.packages) {
+    packs.push(p.code);
+    names.push(p.name)
+  }
+  return {
+    codes: packs,
+    names: names
+  };
 }
-//process element/string for lang phrases - try to use loaded object/current/default
-export function useLang(element, lang) {
-  return new Promise(async function (resolve, reject) {
+//process element/string for lang phrases - try to use loaded object/current
+export async function useLang(element) {
     var langConfig = await userData.requireJSON(parsedPath);
-    if (typeof lang == "string") {
-      if (current !== lang) {
-        if (!(lang in langConfig.packages)) return reject(new Error("Non exisiting language requested!"));
-        await loadObject(langConfig.packages[lang]);
-      } 
-    } else {
-      if (!current) await loadObject(langConfig.packages[langConfig.current]);
-      resolve(processLang(element));
-    }
-  });
+    if (!current) await loadObject(langConfig.packages[langConfig.current]);
+    if (element.tagName === "HTML") element.setAttribute("lang", current.toLowerCase());
+    return processLang(element);
+};
+export async function changeLang(element, code) {
+
 };
 //actual element processing
-export function processLang(element) {
+function processLang(element) {
   if (element.nodeType === Node.ELEMENT_NODE) element = [element];
   if (element instanceof Array || element instanceof NodeList) {
-    element.forEach(function (el) {
-      if (!(forbiddenAttrs.every(attr => { return !el.hasAttribute(attr); })) || omitted.includes(el.tagName)) return;
-      el.childNodes.forEach(function (el) {
-        switch (el.nodeType) { //CONTENTS
+    for (let el of element) {
+      if (!(forbiddenAttrs.every(attr => {
+          return !el.hasAttribute(attr);
+        })) || omitted.includes(el.tagName)) return;
+      for (let ch of el.childNodes) {
+        switch (ch.nodeType) {
           case Node.ELEMENT_NODE:
-            if (!(forbiddenAttrs.every(attr => { return !el.hasAttribute(attr); })) || omitted.includes(el.tagName)) return;
-            processLang(el);
+            processLang(ch);
             break;
           case Node.TEXT_NODE:
-            el.nodeValue = replaceString(el.nodeValue, loadedObj);
+            replaceStringToElement(ch, loadedObj);
             break;
           default:
-            break; //do nothing
+            break;
         }
-      });
-      for (let attr of el.attributes) {
-        attr.value = replaceString(attr.value, loadedObj);
       }
-    });
+      attributesProcessor(el, loadedObj);
+    }
     return element;
   } else if (typeof element === "string") {
     return replaceString(element, loadedObj);
   }
 };
 //actual text processing
-export function replaceString(input, obj) {
-  var reg = /\[lang:(.*?)\]/i;
-  let match, index, len, exp, Case;
-  while (input.search(reg) >= 0) {
-    match = input.match(reg)[0];
-    index = input.match(reg).index;
-    len = match.length;
-    exp = match.replace(/([\]\s]|\[lang:)/gi, "");
-    if (obj[exp.toLowerCase()]) {
-      let rep = utils.matchCase(exp, obj[exp.toLowerCase()]);
-      input = splice(input, index, len, rep);}
-    else input = splice(input, index, len, exp);
+function replaceString(input, obj) {
+  for (let m of input.matchAll(regex)) {
+    let phrase;
+    if (obj[m[1].toLowerCase()]) {
+      phrase = obj[m[1].toLowerCase()];
+      phrase = utils.matchCase(m[1], phrase);
+    } else phrase = m[1];
+    return utils.splice(input, m.index, m[0].length, phrase);
   }
-  return input;
-};
-//get or set dafault
-export function defaultLang(def) {
-  return new Promise(async function (resolve, reject) {
-    if (typeof def === "string" && def !== "") {
-      let obj = {
-        default: def
-      };
-      let langConfig = await userData.requireJSON(parsedPath);
-      if (!(def in langConfig.packages)) return reject(new Error("Cannot set invalid default!"));
-      await userData.updateJSON(parsedPath, obj);
-      resolve(obj.default);
-    } else {
-      let obj = await userData.requireJSON(parsedPath);
-      resolve(obj.default);
+  return null;
+}
+//textNode to <lang-data> element
+function replaceStringToElement(textNode, obj) {
+  for (let m of textNode.nodeValue.matchAll(regex)) {
+    let phrase;
+    if (obj[m[1].toLowerCase()]) {
+      phrase = obj[m[1].toLowerCase()];
+      phrase = utils.matchCase(m[1], phrase);
+    } else phrase = m[1];
+    let elem = document.createElement("lang-data");
+    elem.setAttribute("code", current);
+    elem.setAttribute("expression", m[1]);
+    elem.innerHTML = phrase;
+    textNode.replaceWith(textNode.nodeValue.slice(0, m.index), elem, textNode.nodeValue.slice(m.index + m[0].length));
+  }
+}
+
+function attributesProcessor(element, obj) {
+  let vals = [];
+  for (let attr of element.attributes) {
+    if (attr.name == "lang-attrs") continue;
+    let out = replaceString(attr.value, obj);
+    if (out) {
+      vals.push(attr.name + "=" + attr.value);
+      attr.value = out;
     }
-  });
+  }
+  if (vals.length > 0) element.setAttribute("lang-attrs", vals.join("&"));
+}
+//get or set dafault
+export async function defaultLang(def) {
+  if (typeof def === "string" && def !== "") {
+    let obj = {
+      default: def
+    };
+    let langConfig = await userData.requireJSON(parsedPath);
+    if (!(def in langConfig.packages)) throw new Error(`Cannot set invalid default! (${def}) Valid codes: [${Object.keys(langConfig.packages).join(", ")}]`);
+    await userData.updateJSON(parsedPath, obj);
+    return obj.default;
+  } else {
+    let obj = await userData.requireJSON(parsedPath);
+    return obj.default;
+  }
 };
 //get or set current
-export function currentLang(code, load) {
-  return new Promise(async function (resolve, reject) {
+export function currentLang(code) {
+  return new Promise(async function (resolve) {
     if (typeof code === "string" && code !== "") {
       let obj = {
         current: code
       };
       let langConfig = await userData.requireJSON(parsedPath);
-      if (!(code in langConfig.packages)) return reject(new Error("Cannot set invalid current!"));
+      if (!(code in langConfig.packages)) throw new Error("Cannot set invalid current!");
       await userData.updateJSON(parsedPath, obj)
+      if (current !== code) { //unload old object
+        loadedObj = null;
+        current = null;
+      }
     } else {
-      let obj = await userData.requireJSON(parsedPath);
-      resolve(obj.current);
+      if (!current) var {
+        current
+      } = await userData.requireJSON(parsedPath);
+      resolve(current);
     }
   });
 };
 //get certain lang pharse
-export function getPhrase(lang, phrases) {
-  return new Promise(async function (resolve, reject) {
-    phrases = phrases instanceof Array ? phrases : [phrases];
-    let out = [];
-    if (typeof lang !== "string") return reject(new Error("Lang wasn't specified!"));
-    if (lang === current) {
-      for (let phrase of phrases) {
-        out.push(loadedObj[phrase]);
-      }
-      resolve(out);
-    } else {
-      var langConfig = await userData.requireJSON(parsedPath);
-      if (!(lang in langConfig.packages)) return reject(new Error("Invalid lang!"));
-      var langdata = await data.requireJSON(joinPath("config-data/lang", langConfig.packages[lang].pack));
-      for (let phrase of phrases) {
-        out.push(langdata.data[phrase]);
-      }
-      resolve(out);
+export async function getPhrase(lang, phrases) {
+  phrases = phrases instanceof Array ? phrases : [phrases];
+  let out = [];
+  lang = typeof lang == "string" ? lang : current;
+  if (!lang) throw new Error(`Cannot get phrase! Invalid lang or not specified!`)
+  if (lang === current) {
+    for (let phrase of phrases) {
+      out.push(loadedObj[phrase]);
     }
-  });
+    return out;
+  } else {
+    var langConfig = await userData.requireJSON(parsedPath);
+    if (!(lang in langConfig.packages)) throw new Error(`Invalid lang specified! (${lang}) Valid codes: [${Object.keys(langConfig.packages).join(", ")}]`);
+    var langdata = await data.requireJSON(joinPath("config-data/lang", langConfig.packages[lang].pack));
+    for (let phrase of phrases) {
+      out.push(langdata.data[phrase]);
+    }
+    return out;
+  }
 };

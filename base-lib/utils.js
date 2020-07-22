@@ -46,7 +46,7 @@ lib.assert = function(values, types) {
     if (types.length < values.length) values = values.slice(0, types.length);
     for (let i=0;i< values.length;i++) {
         if (typeof types[i] === "string") {
-            if (typeof values[i] !== types[i]) throw new Error((i+1)+"(th) argument is a "+typeof values[i]+" but should be a "+types[i]);
+            if (typeof values[i] !== types[i]) throw new Error((i+1)+"(th) argument is a(n) "+typeof values[i]+" but should be a(n) "+types[i]);
         } else if (!(values[i] instanceof types[i])) throw new Error((i+1)+"(th) argument should be an instance of "+types[i].constructor.name+"!");
     }
     return true;
@@ -60,5 +60,8 @@ lib.merge = function(obj1, obj2) {
 };
 lib.isObject = function(e) {
     return e instanceof Object && !(e instanceof Array) && typeof e !== "function";
+};
+lib.splice = function (string, idx, rem, str) {
+    return string.slice(0, idx) + str + string.slice(idx + Math.abs(rem));
 };
 module.exports = lib;

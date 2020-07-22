@@ -3,9 +3,7 @@ const windowEvent = libs.req("windowEvent");
 export function init() {
   try {
     document.getElementById("close").addEventListener("click", function () {
-      winTools({
-        method: "close"
-      });
+      winTools({method: "close"});
     });
     document.getElementById("maximize").addEventListener("click", async function () {
       if (await winTools({"method": "isFullScreen"})) document.getElementById("fullscreen").click();
@@ -43,6 +41,7 @@ export function init() {
     });
   } catch (e) {
     console.error(e);
+    winTools({method: "close"});
     throw new Error("Error enabling basic frame functions!");
   }
 }

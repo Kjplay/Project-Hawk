@@ -25,7 +25,9 @@ function once(...args) {
 }
 
 async function directShow(elem, name, isFirst, configObj) {
-  let { transition } = configObj;
+  let {
+    transition
+  } = configObj;
   transition = typeof transition === "string" ? transition : "fadeInAndScale";
   let j = prePanels.findIndex(e => e.name === name);
   if (j !== -1) prePanels.splice(j, 1);
@@ -57,7 +59,8 @@ async function directShow(elem, name, isFirst, configObj) {
 async function showPanel(name, configObj) {
   configObj = utils.isObject(configObj) ? configObj : {};
   let {
-    forceLoad, transition
+    forceLoad,
+    transition
   } = configObj;
   let i = prePanels.findIndex(x => x.name === name);
   if (i !== -1) {
@@ -72,7 +75,7 @@ async function showPanel(name, configObj) {
         deletePanel(name);
         elem = await preparePanel(name);
         await directShow(elem.elem, elem.name, true, configObj);
-      } else  await directShow(elem, name, false, configObj);
+      } else await directShow(elem, name, false, configObj);
     } else if (forceLoad) {
       try {
         await undo();
@@ -88,21 +91,23 @@ async function showPanel(name, configObj) {
   }
   return true;
 }
+
 function awaitScript(src, h, module) {
   return new Promise(resolve => {
     if (!src) resolve();
     else {
       let s = document.createElement("script");
-      s.onload = function() {
+      s.onload = function () {
         resolve();
       }
       if (module) s.setAttribute("type", "module");
       h.appendChild(s);
       s.src = src;
-      
+
     }
   })
 }
+
 function awaitAllScripts(scripts, h) {
   return new Promise(resolve => {
     let promises = [];
@@ -117,16 +122,13 @@ function awaitAllScripts(scripts, h) {
 }
 async function preparePanel(name) {
   var panelData;
+  let panelPath = await dataLib.exists(`data/html_assets/html_panels/${name}.html`) ? `${name}.html` : `${name}/index.html`
   try {
-    panelData = await dataLib.read(`data/html_assets/html_panels/${name}.html`);
+    panelData = await dataLib.read(`data/html_assets/html_panels/${panelPath}`);
   } catch (e) {
-    try {
-      panelData = await dataLib.read(`data/html_assets/html_panels/${name}/index.html`);
-    } catch (e) {
-      console.error(e);
-      dialog.popUp(`Error opening ${name} panel!`);
-      throw new Error(`Error opening ${name} panel!`);
-    }
+    console.error(e);
+    dialog.popUp(`Error opening ${name} panel!`);
+    throw new Error(`Error opening ${name} panel!`);
   }
   let html = document.createElement("main");
   html.setAttribute("name", name);
@@ -139,6 +141,13 @@ async function preparePanel(name) {
     });
     s.remove();
   }
+  for (let s of html.querySelectorAll(`link[rel="stylesheet"]`)) {
+    let e = document.createElement("style");
+    e.setAttribute("scoped", "");
+    e.innerHTML = `@import url("${s.getAttribute("href")}");`;
+    s.outerHTML = e.outerHTML;
+  }
+  for (let s of html.querySelectorAll("style:not([scoped])")) s.setAttribute("scoped", "");
   html.hidden = true;
   document.querySelector("control-frame").append(html);
   await awaitAllScripts(srcs, html);
