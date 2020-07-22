@@ -1,0 +1,26 @@
+{
+    "asar": true,
+    "appId": "com.electron.project_hawk",
+    "copyright": "Copyright © 2020 Jakub Jaruszewski",
+    "directories": {
+      "output": "dist/hawk"
+    },
+    "nsis": { 
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "build/app.ico"
+    },
+    "win": {
+		"icon": "build/app.ico",
+		"target": "nsis"
+    },
+    "mac": {
+		"darkModeSupport": true,
+		"icon": "build/app.icns",
+		"target": "dmg"
+    },
+    "linux": {
+        "target": "deb"
+    }
+}

@@ -26,6 +26,7 @@ function once(...args) {
 
 async function directShow(elem, name, isFirst, configObj) {
   let { transition } = configObj;
+  transition = typeof transition === "string" ? transition : "fadeInAndScale";
   let j = prePanels.findIndex(e => e.name === name);
   if (j !== -1) prePanels.splice(j, 1);
   let cur = document.querySelector("main[current]");
@@ -43,7 +44,7 @@ async function directShow(elem, name, isFirst, configObj) {
   elem.hidden = false;
   if (transition !== "instant") {
     elem.style.animation = "";
-    elem.style.animation = "fadeInAndScale 0.3s ease-out";
+    elem.style.animation = `${transition} 0.3s ease-out`;
   }
   if (isFirst) emitter.emit(`showing-first-${name}`);
   emitter.emit(`showing-${name}`);
@@ -122,7 +123,7 @@ async function preparePanel(name) {
     try {
       panelData = await dataLib.read(`data/html_assets/html_panels/${name}/index.html`);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       dialog.popUp(`Error opening ${name} panel!`);
       throw new Error(`Error opening ${name} panel!`);
     }

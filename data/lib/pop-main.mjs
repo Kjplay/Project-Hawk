@@ -123,7 +123,6 @@ async function confirm(text, callback) {
     hasCancelButton: true,
     content: text
   });
-  console.log(cover);
   cover.querySelector(`button.btn_ok`).addEventListener("click", function () {
     if (typeof callback === "function") callback(true);
     let name = cover.getAttribute("popUpName");

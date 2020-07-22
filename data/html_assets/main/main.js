@@ -7,5 +7,5 @@ import {
 } from "../../../base-lib/frame.mjs";
 lang.useLang(document.querySelector("html")).then(async () => {
   frameInit();
-  await panels.showPanel("menu", {transition: "instant"});
+  await panels.showPanel("menu", {transition: "fadeIn"});
 });

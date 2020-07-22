@@ -14,10 +14,8 @@ Module used for language operiations
 */
 //dependencies
 const userData = libs.req("userData");
-const helpers = libs.req("helpers");
 const utils = libs.req("utils");
 const joinPath = libs.req("joinPath");
-const getData = libs.req("getData");
 const data = libs.req("data");
 //custom vars
 var loadedObj;
@@ -29,37 +27,13 @@ const parsedPath = "config-data/lang-data.json";
 var splice = function (string, idx, rem, str) {
   return string.slice(0, idx) + str + string.slice(idx + Math.abs(rem));
 };
-//config repair
-export async function evaluateConfig(jsonObj) {
-  let entries = await data.directoryContents("config/data");
-  let newObj = {};
-  for (let entry of entries) {
-    if (entry.type !== "file") continue;
-    let js = await data.requireJSON(`config-data/lang/${entry.name}`);
-    newObj[js.code] = {
-      "pack": entry.name,
-      "name": js.fullName
-    }
-  }
-  jsonObj["packages"] = newObj;
-  return jsonObj;
-}
-//check if current is valid
-export async function checkLang() {
-  const appPath = getData("appPath");
-  let langConfig = await userData.requireJSON("config-data/lang-data.json");
-  if (langConfig.current) {
-    let check = await helpers.exists(joinPath(appPath, `config-data/lang/${langConfig.packages[langConfig.current].pack}`));
-    if (check) return true;
-    else throw new Error("Missing lang package. Invalid current!");
-  } else return false;
-}
+
 //load Object to memory
-export async function loadObject(p, lg) {
-  const appPath = await getData("appPath");
-  let obj = await helpers.requireJSON(joinPath(appPath, "config-data/lang", p));
+export async function loadObject(config) {
+  let { code, pack } = config;
+  let obj = await data.requireJSON(joinPath("config-data/lang", pack));
   loadedObj = obj.data;
-  current = lg;
+  current = code;
   return loadedObj;
 }
 //make list of all avabile languages and their packs
@@ -67,96 +41,29 @@ export function langList() {
   return new Promise(async function (resolve, reject) {
     var packs = [];
     var names = [];
-    var pr = [];
     var langConfig = await userData.requireJSON(parsedPath);
-    if (Object.keys(langConfig.packages).length === 0) reject(new Error("No packages avabile!"));
-    for (let pack in langConfig.packages) pr.push(checkPackage(langConfig.packages[pack].pack));
-    Promise.all(pr).then(data => {
-      for (let i = 0; i < data.length; i++) {
-        if (data[i]) {
-          let pack = Object.keys(langConfig.packages)[i].toUpperCase();
-          let name = langConfig.packages[Object.keys(langConfig.packages)[i]].name;
-          packs.push(pack);
-          names.push(name);
-        }
-      }
-      if (packs.length > 0 && names.length > 0) {
-        resolve({
-          codes: packs,
-          names: names
-        });
-      } else reject(new Error("No valid packages!")); //no packs
+    for (let p in langConfig.packages) {
+      packs.push(p.code);
+      names.push(p.name)
+    }
+    resolve({
+      codes: packs,
+      names: names
     });
   });
-}
-//check if package is valid
-export async function checkPackage(reqPath) {
-  const appPath = await getData("appPath");
-  return await helpers.exists(joinPath(appPath, `config-data/lang/${reqPath}`));
 }
 //process element/string for lang phrases - try to use loaded object/current/default
 export function useLang(element, lang) {
   return new Promise(async function (resolve, reject) {
     var langConfig = await userData.requireJSON(parsedPath);
-    if (langConfig.current) {
-      if (current !== langConfig.current && current !== "" && current) { //need to update langconfig
-        await current(current);
-      }
-      if (lang && lang !== current) {
-        let p = langConfig.packages[current];
-        if (p) p = p.pack;
-        else {
-          reject(new Error("Invalid current - leading to non-existing object property!"));
-          return;
-        }
-        try {
-          await loadObject(p, current);
-          resolve(processLang(element));
-        } catch (e) {
-          reject(new Error("Invalid pack!"));
-          return;
-        }
-      } else if (lang && current === lang && current !== "" && current) {
-        resolve(processLang(element));
-      } else {
-        if (current == langConfig.current && loadedObj instanceof Object) {
-          resolve(processLang(element, current));
-        } else {
-          try {
-            await loadObject(langConfig.packages[langConfig.current].pack, langConfig.current);
-            resolve(processLang(element));
-          } catch (e) {
-            console.error(e);
-            reject(new Error("Invalid current!"));
-            return;
-          }
-        }
-      }
+    if (typeof lang == "string") {
+      if (current !== lang) {
+        if (!(lang in langConfig.packages)) return reject(new Error("Non exisiting language requested!"));
+        await loadObject(langConfig.packages[lang]);
+      } 
     } else {
-      if (lang && lang !== "") {
-        let p = langConfig.packages[lang];
-        if (p) p = p.pack;
-        else {
-          reject(new Error("Invalid lang - leading to non-existing object property!"));
-          return;
-        }
-        try {
-          await loadObject(p, lang);
-          resolve(processLang(element));
-        } catch (e) {
-          reject(new Error("Invalid pack!"));
-          return;
-        }
-      } else {
-        try {
-          await loadObject(langConfig.packages[langConfig.default].pack, langConfig.default);
-          resolve(processLang(element));
-        } catch (e) {
-          console.error(e);
-          reject(new Error("Invalid pack!"));
-          return;
-        }
-      }
+      if (!current) await loadObject(langConfig.packages[langConfig.current]);
+      resolve(processLang(element));
     }
   });
 };
@@ -211,19 +118,13 @@ export function defaultLang(def) {
       let obj = {
         default: def
       };
-      try {
-        let out = await userData.updateJSON(parsedPath, obj);
-        resolve(out);
-      } catch (e) {
-        reject(new Error("Error setting default!"));
-      }
+      let langConfig = await userData.requireJSON(parsedPath);
+      if (!(def in langConfig.packages)) return reject(new Error("Cannot set invalid default!"));
+      await userData.updateJSON(parsedPath, obj);
+      resolve(obj.default);
     } else {
-      try {
-        let obj = await userData.requireJSON(parsedPath);
-        resolve(obj.default);
-      } catch (e) {
-        reject(new Error("Missing config - fatal error!"));
-      }
+      let obj = await userData.requireJSON(parsedPath);
+      resolve(obj.default);
     }
   });
 };
@@ -234,40 +135,12 @@ export function currentLang(code, load) {
       let obj = {
         current: code
       };
-      try {
-        let out = await userData.updateJSON(parsedPath, obj);
-        if (load) {
-          try {
-            let langConfig = await userData.requireJSON(parsedPath);
-            let p = langConfig.packages[current];
-            if (p) p = p.pack;
-            else {
-              reject(new Error("Invalid current - leading to non-existing object property!"));
-              return;
-            }
-            try {
-              await loadObject(p, current);
-              resolve(code);
-            } catch (e) {
-              reject(new Error("Invalid pack!"));
-              return;
-            }
-          } catch (e) {
-            reject(new Error("Missing config - fatal error!"));
-            return;
-          }
-        }
-        resolve(out);
-      } catch (e) {
-        reject(new Error("Error setting current!"));
-      }
+      let langConfig = await userData.requireJSON(parsedPath);
+      if (!(code in langConfig.packages)) return reject(new Error("Cannot set invalid current!"));
+      await userData.updateJSON(parsedPath, obj)
     } else {
-      try {
-        let obj = await userData.requireJSON(parsedPath);
-        resolve(obj.current);
-      } catch (e) {
-        reject(new Error("Missing config - fatal error!"));
-      }
+      let obj = await userData.requireJSON(parsedPath);
+      resolve(obj.current);
     }
   });
 };
@@ -275,31 +148,21 @@ export function currentLang(code, load) {
 export function getPhrase(lang, phrases) {
   return new Promise(async function (resolve, reject) {
     phrases = phrases instanceof Array ? phrases : [phrases];
-    if (lang && lang === current && loadedObj instanceof Object) {
-      var out = [];
+    let out = [];
+    if (typeof lang !== "string") return reject(new Error("Lang wasn't specified!"));
+    if (lang === current) {
       for (let phrase of phrases) {
         out.push(loadedObj[phrase]);
       }
       resolve(out);
     } else {
-      try {
-        var langConfig = await userData.requireJSON(parsedPath);
-        checkPackage(langConfig.packages[lang].pack).then(async function (check) {
-          if (check) {
-            let obj = await helpers.requireJSON(joinPath(appPath, "config-data/lang", langConfig.packages[lang].pack));
-            var out = [];
-            for (let phrase of phrases) {
-              out.push(obj[phrase]);
-            }
-            resolve(out);
-          } else {
-            reject(new Error("Invalid pack!"));
-          }
-        });
-      } catch (e) {
-        console.error(e);
-        reject(new Error("Missing config - fatal error!"));
+      var langConfig = await userData.requireJSON(parsedPath);
+      if (!(lang in langConfig.packages)) return reject(new Error("Invalid lang!"));
+      var langdata = await data.requireJSON(joinPath("config-data/lang", langConfig.packages[lang].pack));
+      for (let phrase of phrases) {
+        out.push(langdata.data[phrase]);
       }
+      resolve(out);
     }
   });
 };

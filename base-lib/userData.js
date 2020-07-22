@@ -5,8 +5,10 @@
 //Dependencies
 const fs = require("fs");
 const path = require("path");
-const helpers = require("./helpers");
+const JSONlib = require("./JSONlib");
 const { ipcRenderer, app } = require("electron");
+const { parse } = require("path");
+const { EROFS } = require("constants");
 
 var dataLib = {};
 //Container
@@ -17,7 +19,7 @@ async function setBase() {
 if (!baseDir) setBase();
 //Base directory
 function checker(path) {
-    if (path.indexOf(baseDir) !== 0) throw new Error("File operations outside " + baseDir + " are not allowed!");
+    if (!path.startsWith(baseDir)) throw new Error("File operations outside " + baseDir + " are not allowed!");
 }
 
 //Check if file or dir exists
@@ -111,32 +113,20 @@ dataLib.delete = function (dir) {
         } else reject(new Error("No params!"));
     });
 };
-dataLib.requireJSON = function (dir) {
-    return new Promise((resolve, reject) => {
-        helpers.requireJSON(path.join(baseDir, dir)).then(data => {
-            resolve(data);
-        }).catch(e => {
-            reject(e);
-        });
-    });
+dataLib.requireJSON = async function (dir) {
+    let parsed = path.join(baseDir, dir);
+    checker(parsed);
+    return await JSONlib.requireJSON(parsed);
 };
-dataLib.updateJSON = function (dir, obj) {
-    return new Promise((resolve, reject) => {
-        helpers.updateJSON(path.join(baseDir, dir), obj).then(data => {
-            resolve(data);
-        }).catch(e => {
-            reject(e);
-        });
-    });
+dataLib.updateJSON = async function (dir, obj) {
+    let parsed = path.join(baseDir, dir);
+    checker(parsed);
+    return await JSONlib.updateJSON(parsed, obj);
 };
-dataLib.replaceJSON = function (dir, obj) {
-    return new Promise((resolve, reject) => {
-        helpers.replaceJSON(path.join(baseDir, dir), obj).then(data => {
-            resolve(data);
-        }).catch(e => {
-            reject(e);
-        });
-    });
+dataLib.replaceJSON = async function (dir, obj) {
+    let parsed = path.join(baseDir, dir);
+    checker(parsed);
+    return await JSONlib.replaceJSON(parsed, obj);
 };
 dataLib.directoryContents = function (dir) {
     return new Promise((resolve, reject) => {
@@ -156,6 +146,18 @@ dataLib.directoryContents = function (dir) {
                 } else reject(new Error("Error reading " + dir + " contents!"));
             });
         } else reject(new Error("No params!"));
+    });
+};
+dataLib.direcotryEntries = function (dir) {
+    return new Promise((resolve, reject) => {
+        if (dir) {
+            let parsed = path.join(baseDir, dir);
+            checker(parsed);
+            fs.readdir(parsed, (err, data) => {
+                if (!err && data) return resolve(data);
+                reject(new Error("Error reading: "+dir));
+            });
+        }
     });
 };
 dataLib.getDirNames = function (dir) {

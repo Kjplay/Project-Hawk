@@ -6,6 +6,8 @@ const path = require("path");
 const fs = require("fs");
 const { app } = require("electron");
 const baseDir = app.getPath("userData");
+const configChecker = require("./config-checker");
+const userData = require("../base-lib/userData");
 //import evaluateConfig from "../data/lib/check-lang.mjs";
 //Container
 var check = {};
@@ -15,8 +17,7 @@ check.init = function () {
     try {
       let tree = await JSONlib.requireJSON(path.join(__dirname, "../config-data/foldertree.json"));
       await check.folders(tree);
-      let fileTree = await JSONlib.requireJSON(path.join(__dirname, "../config-data/filestree.json"));
-      await check.files(fileTree);
+      await configChecker.checkAll();
       resolve(true);
     } catch (err) {
       reject(err);

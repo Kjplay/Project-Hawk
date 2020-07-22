@@ -23,7 +23,7 @@ For exporting story to a playable format see StoryDispatcher (currently to do)
 const helpers = libs.req("helpers");
 const userData = libs.req("userData");
 const utils = libs.req("utils");
-import EventEmitter from "../lib/emitterClass.mjs";
+import EventEmitter from "../../lib/emitterClass.mjs";
 //constants
 const allowedTagKeys = ["color"];
 const allowedPosKeys = ["color", "pointsArray"];
@@ -35,7 +35,7 @@ var selected = null;
 var container = {
   stories: {}
 };
-export default class Story {
+export default class HawkStory {
   constructor(attributes, data) {
     this.#applyAttrs(attributes);
     this.#applyData(data);
@@ -73,7 +73,7 @@ export default class Story {
     return this.#attributes.passages;
   }
   get isSelected() {
-    if (selected instanceof Story) return selected.fullName === this.fullName;
+    if (selected instanceof HawkStory) return selected.fullName === this.fullName;
     else return false;
   }
   //loading and saving
@@ -97,7 +97,7 @@ export default class Story {
       positionGroups: {}
     }
     container.stories[this.fullName] = this;
-    if (selected instanceof Story && selected.fullName === this.fullName) selected = null;
+    if (selected instanceof HawkStory && selected.fullName === this.fullName) selected = null;
   }
   async load() {
     try {
@@ -106,14 +106,14 @@ export default class Story {
       this.#applyData(data);
       this.#applyAttrs(attrs);
       this.#updateAttrs();
-      if (selected instanceof Story) await selected.unload();
+      if (selected instanceof HawkStory) await selected.unload();
       selected = this;
     } catch (e) {
       throw e;
     }
   }
   async delete() {
-    if (selected instanceof Story && selected.fullName === this.fullName) selected = null;
+    if (selected instanceof HawkStory && selected.fullName === this.fullName) selected = null;
     await userData.delete(`stories/${this.fullName}`);
     delete container.stories[this.fullName];
     this.#attributes = {};
@@ -124,7 +124,7 @@ export default class Story {
     };
   }
   static async delete(name) {
-    if (selected instanceof Story && selected.fullName === name) selected = null;
+    if (selected instanceof HawkStory && selected.fullName === name) selected = null;
     try {
       await userData.delete(`stories/${name}`);
       delete container.stories[name];
@@ -136,7 +136,7 @@ export default class Story {
     }
   }
   static removeSelected() {
-    if (selected instanceof Story) selected.unload();
+    if (selected instanceof HawkStory) selected.unload();
   }
   update(attributes, data) {
     this.#applyAttrs(attributes);
@@ -154,12 +154,12 @@ export default class Story {
     var out = {};
     for (let n of names) {
       if (cachedNames.includes(n)) out[n] = container.stories[n];
-      else out[n] = await Story.#loadOneAttrsFromDir(n);
+      else out[n] = await HawkStory.#loadOneAttrsFromDir(n);
     }
     return out;
   }
   static async getByName(name, useCache) {
-    let s = await Story.getAll(useCache);
+    let s = await HawkStory.getAll(useCache);
     for (let key in s) {
       let sName = key.slice(0, key.lastIndexOf(" ")).trim();
       if (sName !== name) delete s[key];
@@ -167,7 +167,7 @@ export default class Story {
     return s;
   }
   static async getByID(id, useCache) {
-    let s = await Story.getAll(useCache);
+    let s = await HawkStory.getAll(useCache);
     for (let key in s) {
       let sID = key.slice(key.lastIndexOf(" ")).trim();
       if (sID !== id) delete s[key];
@@ -262,7 +262,7 @@ export default class Story {
   }
   static #loadOneAttrsFromDir = async (dir) => {
     let attrs = await userData.requireJSON(`stories/${dir}/attributes.json`);
-    let s = new Story(attrs); //cache
+    let s = new HawkStory(attrs); //cache
     return s;
   }
 }

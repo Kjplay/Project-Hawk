@@ -52,6 +52,7 @@ win-controls div {
 win-controls div span {
   color: var(--text);
   margin: auto;
+  user-select: none;
 }
 win-controls div:not(#close):hover {
   background-color: var(--trans-grey);

@@ -5,13 +5,14 @@
 //Dependencies
 const fs = require("fs");
 const path = require("path");
+const JSONlib = require("./JSONlib");
 //Container
 var dataLib = {};
 //Base directory
 baseDir = path.join(__dirname, "..");
 //checker
 function checker(path) {
-    if (path.indexOf(baseDir) !== 0) throw new Error("File operations outside "+baseDir+" are not allowed!");
+    if (!path.startsWith(baseDir)) throw new Error("File operations outside "+baseDir+" are not allowed!");
 }
 //Check if file or dir exists
 dataLib.exists = function (dir) {
@@ -24,34 +25,29 @@ dataLib.exists = function (dir) {
         })
     });
 };
-dataLib.directoryContents = function (dir) {
+dataLib.directoryEntries = function (dir) {
     return new Promise((resolve, reject) => {
         if (dir) {
-            checker(path.join(baseDir, dir));
-            fs.readdir(path.join(baseDir, dir), {
-                withFileTypes: true
-            }, (err, data) => {
-                if (!err && data instanceof Array) {
-                    data = data.map(f => {
-                        return {
-                            name: f.name,
-                            type: f.isDirectory() ? "directory" : (f.isFile() ? "file" : "unknown")
-                        }
-                    });
-                    resolve(data);
-                } else reject(new Error("Error reading " + dir + " contents!"));
+            let parsed = path.join(baseDir, dir);
+            checker(parsed);
+            fs.readdir(parsed, (err, data) => {
+                if (!err && data) return resolve(data);
+                reject(new Error("Error reading: "+dir));
             });
-        } else reject(new Error("No params!"));
+        }
     });
 };
 dataLib.requireJSON = async function(dir) {
-    return await JSONlib.requireJSON(path.join(baseDir, dir));
+    let parsed = path.join(baseDir, dir);
+    checker(parsed);
+    return await JSONlib.requireJSON(parsed);
 };
 dataLib.read = function (dir) {
     return new Promise((resolve, reject) => {
         if (dir) {
-            checker(path.join(baseDir, dir));
-            fs.readFile(path.join(baseDir, dir), "utf-8", (err, data) => {
+            let parsed = path.join(baseDir, dir);
+            checker(parsed);
+            fs.readFile(parsed, "utf-8", (err, data) => {
                 if (!err && data) resolve(data);
                 else reject(new Error("Error reading!\n" + dir));
             });

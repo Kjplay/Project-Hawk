@@ -1,14 +1,17 @@
 {
   "name": "project_hawk",
   "productName": "Project Hawk",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Text-game engine (similar to Twine 2)",
   "main": "index.js",
   "dependencies": {},
+  "homepage": "https://github.com/Kjplay/Project-Hawk",
   "icon": "build/app.ico",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --x64"
+    "build:win": "electron-builder --x64 --config electron-builder-config.json --win",
+    "build:mac": "electron-builder --x64 --config electron-builder-config.json --mac",
+    "buld:linux": "electron-builder --x64 --config electron-builder-config.json --linux"
   },
   "repository": {
     "type": "git",
@@ -17,24 +20,13 @@
   "keywords": [
     "text-game"
   ],
-  "author": "Jakub Jaruszewski",
+  "author": {
+    "name": "Jakub Jaruszewski",
+    "email": "kuba10j@gmail.com"
+  },
   "license": "MIT",
   "devDependencies": {
     "electron": "^9.1.0",
     "electron-builder": "^22.7.0"
-  },
-  "build": {
-    "appId": "com.electron.project_hawk",
-    "copyright": "Copyright © 2020 Jakub Jaruszewski",
-    "directories": {
-      "output": "dist/hawk"
-    },
-    "icon": "build/app.ico",
-    "nsis": {
-      "oneClick": false,
-      "allowElevation": true,
-      "allowToChangeInstallationDirectory": true,
-      "installerIcon": "build/app.ico"
-    }
   }
 }

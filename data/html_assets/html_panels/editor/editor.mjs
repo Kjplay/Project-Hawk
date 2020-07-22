@@ -1,7 +1,7 @@
-import Story from "../../../AppEngine/storyClass.mjs";
+import HawkStory from "../../../AppEngine/hawk/storyClass.mjs";
 import * as panels from "../../../lib/panels.mjs";
 function EditStory() {
-    let s = Story.getSelected();
+    let s = HawkStory.getSelected();
     if (s) {
         document.querySelector("#fullName").innerHTML = s.fullName;
     }

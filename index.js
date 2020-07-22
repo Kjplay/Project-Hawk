@@ -45,6 +45,7 @@ app.whenReady().then(async () => {
       enableRemoteModule: false
     }
   });
+  mainWindow.once("ready-to-show", mainWindow.show);
   ipc.setMain(mainWindow.id);
   ipc.init();
   mainWindow.loadURL("file://" + path.join(__dirname, "data/html_assets/main/index.html"));

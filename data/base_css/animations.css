@@ -10,7 +10,11 @@
     0% { transform: scale(0); }
     40% { transform: scale(1.05); }
     100% { transform: scale(1); }
-  }
+}
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
 @keyframes fadeOutAndScale {
     0% { 
         transform: scale(1); 

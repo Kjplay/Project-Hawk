@@ -1,5 +1,5 @@
 import * as dialog from "../lib/pop-main.mjs";
-import Story from "./storyClass.mjs";
+import HawkStory from "./hawk/storyClass.mjs";
 const dataLib = libs.req("data");
 import * as lang from "../lib/check-lang.mjs";
 import * as panels from "../lib/panels.mjs";
@@ -40,7 +40,7 @@ function updateInfo(title, passages) {
 }
 
 export async function spawnAll() {
-  Story.getAll().then(async stories => {
+  HawkStory.getAll().then(async stories => {
     for (let s in stories) {
       cont[s.fullName] = s;
       await spawnStory(stories[s]);
@@ -49,7 +49,7 @@ export async function spawnAll() {
   });
 }
 export async function spawnStory(storyObj) { //to-do
-  if (storyObj instanceof Story) {
+  if (storyObj instanceof HawkStory) {
     try {
       let data = await dataLib.read("data/html_assets/block_data/story_block.html");
       let el = document.createElement("div");
@@ -106,12 +106,12 @@ export async function spawnStory(storyObj) { //to-do
   }
 }
 export async function createAndSave(attrs, data) {
-  let s = new Story(attrs, data);
+  let s = new HawkStory(attrs, data);
   await s.save();
   return s;
 }
 export async function despawnAndDelete(element) {
-  let result = await Story.delete(element.querySelector("storyinfo").getAttribute("fullName"));
+  let result = await HawkStory.delete(element.querySelector("storyinfo").getAttribute("fullName"));
   if (result) {
     element.parentNode.style.animation = "fadeInAndScale 0.4s ease reverse";
     setTimeout(function () {

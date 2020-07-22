@@ -17,9 +17,15 @@
 }
 [dialog] {
   cursor: pointer;
+  user-select: none;
 }
 [panel] {
   cursor: pointer;
+  user-select: none;
+}
+[action] {
+  cursor: pointer;
+  user-select: none;
 }
 html, body, control-frame, #size {
   overflow: hidden;
@@ -107,6 +113,12 @@ html, body, control-frame, #size {
 .huge {
   font-size: 180%;
 }
+.icon-size {
+  font-size: 200%;
+}
+.huge-icon {
+  font-size: 600%;
+}
 .bold {
   font-weight: bold;
 }
@@ -167,6 +179,9 @@ hr.close {
   position: relative;
 }
 /* positioning */
+.m-left {
+  margin-left: 5px;
+}
 .top {
   position: absolute;
   top: 0px;

@@ -37,7 +37,7 @@ main[name='menu'] button.big_footer {
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
-    font-size: 150%;
+    font-size: 1.6vw;
     font-weight: bold;
     width: 85%;
     height: 48%;
@@ -184,13 +184,15 @@ story div.story-options:hover, story div.story-options:focus-within {
     opacity: 1;
 }
 story div.story-options .opt-like {
-    display: block;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
     height: 133px;
     width: 33.3%;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
-    text-align: center;
     padding-top: 5px;
 }
 story div.story-options opt {
