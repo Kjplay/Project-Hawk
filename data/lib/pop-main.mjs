@@ -1,21 +1,18 @@
 "use strict";
 /*
 Library for custom dialogs
+@TODO:
+- cache opened dialogs
 */
 //dependencies
 import * as lang from "./check-lang.mjs";
-import {
-  modules
-} from "../html_assets/dialog-scripts/index.mjs"
 import * as UI from "./ui-menu.mjs";
-import {
-  showPanel
-} from "./panels.mjs";
 const data = libs.req("data");
 //custom private vars
 var subTimeouts = [];
 var currentIndex = 1;
 var mainCover = false;
+const cached = {};
 //functions
 async function createPopUp(options) {
   options = options instanceof Object ? options : {};
@@ -175,6 +172,13 @@ async function subSpecial(name, message, time) {
   });
 }
 async function specialPop(htmlContent, name, closePromise, onStart) {
+  if (!(name in cached)) {
+    Object.defineProperty(cached, name, {
+      value: Object.freeze({htmlContent, closePromise, onStart}),
+      configurable: false, 
+      writable: false
+    });
+  }
   let cover = await createPopUp({
     name: name,
     hasCloseBar: true,
@@ -202,15 +206,23 @@ async function specialPop(htmlContent, name, closePromise, onStart) {
   }
 };
 async function linkPop(name) {
-  var dialogData;
-  try {
-    dialogData = await data.read(`data/html_assets/dialogs/${name}.html`);
-    if (modules[name]) {
-      specialPop(dialogData, name, modules[name].closePromise, modules[name].onStart);
-    } else specialPop(dialogData, name);
-  } catch (e) {
-    console.warn(e);
-    popUp();
+  let dialogData;
+  if (name in cached) {
+    let { htmlContent, closePromise, onStart } = cached[name];
+    specialPop(htmlContent, name, closePromise, onStart);
+  } else {
+    if (await data.exists(`data/html_assets/dialogs/${name}.html`)) {
+      dialogData = await data.read(`data/html_assets/dialogs/${name}.html`);
+      specialPop(dialogData, name);
+    } else if (await data.exists(`data/html_assets/dialogs/${name}/index.html`)) {
+      dialogData = await data.read(`data/html_assets/dialogs/${name}/index.html`);
+      try {
+        let { onStart, closePromise } = await import(`../html_assets/dialogs/${name}/script.mjs`);
+        specialPop(dialogData, name, closePromise, onStart);
+      } catch (e) {
+        specialPop(dialogData, name);
+      }
+    } else popUp();
   }
 };
 export {

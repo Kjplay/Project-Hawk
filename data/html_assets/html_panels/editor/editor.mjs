@@ -6,4 +6,6 @@ function EditStory() {
         document.querySelector("#fullName").innerHTML = s.fullName;
     }
 }
-panels.on("showing-editor", EditStory);
+panels.on("showing", e => {
+    if (e.name == "editor") EditStory();
+});

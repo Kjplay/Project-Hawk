@@ -1,7 +1,7 @@
 "use strict";
 /*
 Module used for language operations
-@TO-DO:
+@TODO:
 - useLang() -> cleaner code DONE
 - Promise -> async function wherever possible DONE
 - throwing instead of rejecting DONE
@@ -22,12 +22,23 @@ const data = libs.req("data");
 //custom vars
 var loadedObj;
 var current;
+var config;
 //constants
 const omitted = ["SCRIPT", "CANVAS", "IMG"]; //omitted html tags - have to be upper case
 const forbiddenAttrs = ["no-lang"]; //forbidden attributes - case sensitive
 const parsedPath = "config-data/lang-data.json"; //path to config
 const regex = /\[lang:\s*(\w{1,})\s*\]/gi; //regex for finding phrases
 
+async function getConfig() {
+  if (!(utils.isObject(config))) config = await userData.requireJSON(parsedPath);
+  return config;
+}
+async function updateConfig(obj) {
+  if (utils.isObject(obj)) {
+    config = utils.merge(await getConfig(), obj);
+    await userData.replaceJSON(parsedPath, config);
+  }
+}
 //load Object to memory
 export async function loadObject(config) {
   let {
@@ -43,7 +54,7 @@ export async function loadObject(config) {
 export async function langList() {
   var packs = [];
   var names = [];
-  var langConfig = await userData.requireJSON(parsedPath);
+  var langConfig = await getConfig();
   for (let p in langConfig.packages) {
     packs.push(p.code);
     names.push(p.name)
@@ -55,13 +66,10 @@ export async function langList() {
 }
 //process element/string for lang phrases - try to use loaded object/current
 export async function useLang(element) {
-    var langConfig = await userData.requireJSON(parsedPath);
+    var langConfig = await getConfig();
     if (!current) await loadObject(langConfig.packages[langConfig.current]);
     if (element.tagName === "HTML") element.setAttribute("lang", current.toLowerCase());
     return processLang(element);
-};
-export async function changeLang(element, code) {
-
 };
 //actual element processing
 function processLang(element) {
@@ -72,16 +80,8 @@ function processLang(element) {
           return !el.hasAttribute(attr);
         })) || omitted.includes(el.tagName)) return;
       for (let ch of el.childNodes) {
-        switch (ch.nodeType) {
-          case Node.ELEMENT_NODE:
-            processLang(ch);
-            break;
-          case Node.TEXT_NODE:
-            replaceStringToElement(ch, loadedObj);
-            break;
-          default:
-            break;
-        }
+        if (ch.nodeType == Node.ELEMENT_NODE) processLang(ch);
+        else if (ch.nodeType == Node.TEXT_NODE) replaceStringToElement(ch, loadedObj);
       }
       attributesProcessor(el, loadedObj);
     }
@@ -132,39 +132,33 @@ function attributesProcessor(element, obj) {
 }
 //get or set dafault
 export async function defaultLang(def) {
+  let langConfig = await getConfig();
   if (typeof def === "string" && def !== "") {
     let obj = {
       default: def
     };
-    let langConfig = await userData.requireJSON(parsedPath);
     if (!(def in langConfig.packages)) throw new Error(`Cannot set invalid default! (${def}) Valid codes: [${Object.keys(langConfig.packages).join(", ")}]`);
-    await userData.updateJSON(parsedPath, obj);
+    await updateConfig(obj);
     return obj.default;
   } else {
-    let obj = await userData.requireJSON(parsedPath);
-    return obj.default;
+    return langConfig.default;
   }
 };
 //get or set current
 export function currentLang(code) {
   return new Promise(async function (resolve) {
+    let langConfig = await getConfig();
     if (typeof code === "string" && code !== "") {
       let obj = {
         current: code
       };
-      let langConfig = await userData.requireJSON(parsedPath);
       if (!(code in langConfig.packages)) throw new Error("Cannot set invalid current!");
-      await userData.updateJSON(parsedPath, obj)
+      await updateConfig(obj);
       if (current !== code) { //unload old object
         loadedObj = null;
         current = null;
       }
-    } else {
-      if (!current) var {
-        current
-      } = await userData.requireJSON(parsedPath);
-      resolve(current);
-    }
+    } else resolve(langConfig.current);
   });
 };
 //get certain lang pharse
@@ -179,9 +173,9 @@ export async function getPhrase(lang, phrases) {
     }
     return out;
   } else {
-    var langConfig = await userData.requireJSON(parsedPath);
+    let langConfig = await getConfig();
     if (!(lang in langConfig.packages)) throw new Error(`Invalid lang specified! (${lang}) Valid codes: [${Object.keys(langConfig.packages).join(", ")}]`);
-    var langdata = await data.requireJSON(joinPath("config-data/lang", langConfig.packages[lang].pack));
+    let langdata = await data.requireJSON(joinPath("config-data/lang", langConfig.packages[lang].pack));
     for (let phrase of phrases) {
       out.push(langdata.data[phrase]);
     }

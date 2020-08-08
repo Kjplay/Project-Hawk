@@ -12,7 +12,7 @@ export default class Emitter {
     utils.assert([...arguments], ["string", "function"]);
     if (this.#emitFunctions.has(name)) {
       let ar = this.#emitFunctions.get(name);
-      this.#emitFunctions.set(name, [...ar, handler]);
+      this.#emitFunctions.set(name, ar.push(handler));
     } else this.#emitFunctions.set(name, [handler]);
     
   }
@@ -20,18 +20,16 @@ export default class Emitter {
     utils.assert([...arguments], ["string", "function"]);
     if (this.#onceEmit.has(name)) {
       let ar = this.#onceEmit.get(name);
-      this.#onceEmit.set(name, [...ar, handler]);
+      this.#onceEmit.set(name, ar.push(handler));
     } else this.#onceEmit.set(name, [handler]);
   }
-  emit (name) {
+  emit (name, ...args) {
     utils.assert([name], ["string"]);
     if (this.#emitFunctions.has(name)) {
-      for (let h of this.#emitFunctions.get(name)) h();
+      for (let h of this.#emitFunctions.get(name)) h.call(h, ...args);
     }
     if (this.#onceEmit.has(name)) {
-      for (let h of this.#onceEmit.get(name)) {
-        h();
-      }
+      for (let h of this.#onceEmit.get(name)) h.call(h, ...args);
       this.#onceEmit.delete(name);
     }
   }

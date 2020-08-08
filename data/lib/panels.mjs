@@ -48,12 +48,12 @@ async function directShow(elem, name, isFirst, configObj) {
     elem.style.animation = "";
     elem.style.animation = `${transition} 0.3s ease-out`;
   }
-  if (isFirst) emitter.emit(`showing-first-${name}`);
-  emitter.emit(`showing-${name}`);
+  if (isFirst) emitter.emit(`showing-first`, { name });
+  emitter.emit(`showing`, { name });
   if (transition !== "instant") await utils.delay(400);
   panelStackOn(name);
-  if (isFirst) emitter.emit(`showed-first-${name}`);
-  emitter.emit(`showed-${name}`);
+  if (isFirst) emitter.emit(`showed-first`, { name });
+  emitter.emit(`showed`, { name });
   return true;
 }
 async function showPanel(name, configObj) {
@@ -151,7 +151,7 @@ async function preparePanel(name) {
   html.hidden = true;
   document.querySelector("control-frame").append(html);
   await awaitAllScripts(srcs, html);
-  emitter.emit(`prepared-${name}`);
+  emitter.emit(`prepared`, { name });
   prePanels.push({
     name: name,
     elem: html

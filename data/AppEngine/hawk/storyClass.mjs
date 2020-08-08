@@ -28,7 +28,7 @@ import EventEmitter from "../../lib/emitterClass.mjs";
 const allowedTagKeys = ["color"];
 const allowedPosKeys = ["color", "pointsArray"];
 const allowedPasKeys = ["tags", "positionGroups", "content"]; //name is the key here
-const allowedAttrKeys = ["title", "author", "author", "passages", "date-created", "id"];
+const allowedAttrKeys = ["title", "author", "author", "passages", "date_created", "id", "date_modified"];
 const allowedDataKeys = ["tags", "positionGroups", "passages"];
 //containers
 var selected = null;
@@ -74,7 +74,13 @@ export default class HawkStory {
   }
   get isSelected() {
     if (selected instanceof HawkStory) return selected.fullName === this.fullName;
-    else return false;
+    return false;
+  }
+  get dateModified() {
+    return this.#attributes.date_modified.toLocaleString();
+  }
+  get dateCreated() {
+    return this.#attributes.date_created.toLocaleString();
   }
   //loading and saving
   async save() {
@@ -247,22 +253,29 @@ export default class HawkStory {
     this.#recalculateAttrs();
   }
   #applyAttrs = attrs => {
+    console.log(attrs);
     if (this.#validateAttributes(attrs)) {
+      console.log("validated");
       for (let key in attrs) if (typeof attrs[key] === "string") attrs[key].trim();
       this.#attributes = attrs;
     };
+    if (this.#attributes.date_modified) this.#attributes.date_modified = new Date(this.#attributes.date_modified);
+    if (this.#attributes.date_created) this.#attributes.date_created = new Date(this.#attributes.date_created);
   }
   #recalculateAttrs = () => {
     this.#attributes.passages = Object.keys(this.#data.passages).length;
-    //this.#attributes.date_modified = get date here
+    this.#attributes.date_modified = new Date();
   }
   #updateAttrs = () => {
     this.#attributes.passages = this.#attributes.passages ? this.#attributes.passages : Object.keys(this.#data.passages).length;
-    //this.#attributes.date_created = this.#attributes.date_created ?  this.#attributes.date_created : get date here
+    this.#attributes.date_created = this.#attributes.date_created ?  this.#attributes.date_created : new Date();
+    this.#attributes.date_modified = new Date();
   }
   static #loadOneAttrsFromDir = async (dir) => {
     let attrs = await userData.requireJSON(`stories/${dir}/attributes.json`);
+    console.log(attrs);
     let s = new HawkStory(attrs); //cache
+    console.log(s);
     return s;
   }
 }

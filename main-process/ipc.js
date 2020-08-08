@@ -1,42 +1,37 @@
-const { ipcMain, app, BrowserWindow, webContents } = require('electron');
+const { ipcMain, app, BrowserWindow } = require('electron');
 const data = {
     appPath: app.getAppPath(),
     userData: app.getPath("userData")
 }
 var lib = {};
-lib.setMain = function(id) {
-    let win = BrowserWindow.fromId(id);
-    Object.defineProperty(lib, "mainWindow", {
-        value: win,
-        writable: false,
-        configurable: false
-    });
-};
 lib.init = function() {
     ipcMain.handle("get-data", async (event, name) => {
         return data[name];
     });
-    ipcMain.handle("main-window-tools", async (event, obj) => {
-        if (typeof obj.method === "string" && obj.method in lib.mainWindow) {
+    ipcMain.handle("window-tools", async (event, obj) => {
+        let win = BrowserWindow.fromWebContents(event.sender);
+        if (typeof obj.method === "string" && obj.method in win) {
             let args = [];
             if (Array.isArray(obj.args)) args = obj.args;
-            return lib.mainWindow[obj.method](...args);
+            return win[obj.method](...args);
         }
     });
-    lib.windowEvents();
+    app.on("browser-window-created", (_, win) => {
+        lib.windowEvents(win);
+    });
 };
-lib.windowEvents = function() {
-    lib.mainWindow.on("enter-full-screen", () => {
-        lib.mainWindow.webContents.send("window-event", "enter-full-screen");
+lib.windowEvents = function(win) {
+    win.on("enter-full-screen", () => {
+        win.webContents.send("window-event", "enter-full-screen");
     });
-    lib.mainWindow.on("leave-full-screen", () => {
-        lib.mainWindow.webContents.send("window-event", "leave-full-screen");
+    win.on("leave-full-screen", () => {
+        win.webContents.send("window-event", "leave-full-screen");
     });
-    lib.mainWindow.on("maximize", () => {
-        lib.mainWindow.webContents.send("window-event", "maximize");
+    win.on("maximize", () => {
+        win.webContents.send("window-event", "maximize");
     });
-    lib.mainWindow.on("unmaximize", () => {
-        lib.mainWindow.webContents.send("window-event", "unmaximize");
+    win.on("unmaximize", () => {
+        win.webContents.send("window-event", "unmaximize");
     });
 };
 module.exports = lib;

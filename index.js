@@ -21,6 +21,7 @@ app.whenReady().then(async () => {
   //files check
   await check.init();
   //actual app start
+  ipc.init();
   app.on("window-all-closed", () => {
     app.quit();
   });
@@ -42,12 +43,14 @@ app.whenReady().then(async () => {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(app.getAppPath(), "data/lib/preloadMain.js"),
-      enableRemoteModule: false
+      enableRemoteModule: false,
+      worldSafeExecuteJavaScript: true
     }
   });
-  mainWindow.once("ready-to-show", mainWindow.show);
-  ipc.setMain(mainWindow.id);
-  ipc.init();
+  mainWindow.once("ready-to-show", () => {
+    mainWindow.show();
+    mainWindow.focus();
+  });
   mainWindow.loadURL("file://" + path.join(__dirname, "data/html_assets/main/index.html"));
   mainWindow.once("close", () => {
     mainWindow = null;

@@ -39,6 +39,16 @@ function init(element) { //selector can be: selector string, jquery object, html
 }
 
 //handlers
+function resizeHandler(element, ...func) {
+  return function handler(e) {
+    if (element) {
+      element.height = element.scrollHeight;
+      element.width = element.scrollWidth;
+    } else {
+      window.removeEventListener("resize", resizeHandler(element, ...func));
+    }
+  }
+}
 function actionHandler(e) {
   e.preventDefault();
   let atr = this.getAttribute("action");
@@ -97,9 +107,17 @@ async function releaseFocus(noEnd) {
 function isTrapped(elem) {
   return trapped == elem;
 }
+function bindToResize(element, ...func) {
+  window.addEventListener("resize", resizeHandler(element, ...func));
+}
+function unBindToResize(element, ...func) {
+  window.removeEventListener("resize", resizeHandler(element, ...func));
+}
 export {
   init,
   trapFocus,
   releaseFocus,
-  isTrapped
+  isTrapped,
+  bindToResize,
+  unBindToResize
 };

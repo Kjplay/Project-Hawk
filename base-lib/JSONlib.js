@@ -1,5 +1,6 @@
 //Dependencies
 const fs = require("fs");
+const utils = require("./utils");
 //Container
 var lib = {};
 //Parse JSON
@@ -41,9 +42,7 @@ lib.updateJSON = function (path, obj) {
       reject(new Error("No param!"));
       return;
     }
-    for (let key in obj) {
-      oldObj[key] = obj[key];
-    }
+    oldObj = utils.merge(oldObj, obj);
     fs.open(path, "w", (err, fd) => {
       if (!err && fd) {
         fs.write(fd, JSON.stringify(oldObj), err => {

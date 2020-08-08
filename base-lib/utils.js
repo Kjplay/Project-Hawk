@@ -64,4 +64,8 @@ lib.isObject = function(e) {
 lib.splice = function (string, idx, rem, str) {
     return string.slice(0, idx) + str + string.slice(idx + Math.abs(rem));
 };
+lib.stringTester = function(str, options) {
+    options = lib.isObject(options) ? options : {};
+    
+};
 module.exports = lib;

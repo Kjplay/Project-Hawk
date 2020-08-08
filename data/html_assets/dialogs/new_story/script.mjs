@@ -1,6 +1,5 @@
-import * as dialog from "../../lib/pop-main.mjs";
-import * as storyLib from "../../AppEngine/story-main.mjs";
-var script = {};
+import * as dialog from "../../../lib/pop-main.mjs";
+import * as storyLib from "../../../AppEngine/story-main.mjs";
 
 function onStart(element, close) {
     element.querySelector('input[name="newStoryTitle"]').focus();

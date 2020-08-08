@@ -32,7 +32,7 @@ async function getData(name) {
     return await ipcRenderer.invoke("get-data", name);
 }
 async function winTools(obj) {
-    return await ipcRenderer.invoke("main-window-tools", obj);
+    return await ipcRenderer.invoke("window-tools", obj);
 }
 contextBridge.exposeInMainWorld("libs", {
     req: function (name) {

@@ -3,6 +3,7 @@ import HawkStory from "./hawk/storyClass.mjs";
 const dataLib = libs.req("data");
 import * as lang from "../lib/check-lang.mjs";
 import * as panels from "../lib/panels.mjs";
+import getBlock from "../lib/block.mjs";
 const utils = libs.req("utils");
 let cont = {}; //for html updates
 const eventMap = {
@@ -22,8 +23,9 @@ const eventMap = {
   activator: (_, html, storyObj) => {
     let elem = document.querySelector("div.info-menu");
     if (elem.getAttribute("active-story") !== storyObj.fullName) {
-      updateInfo(html.querySelector("storyinfo").getAttribute("title"), html.querySelector("storyinfo").getAttribute("passages_quantity"));
-      elem.setAttribute("active-story", html.querySelector("storyinfo").getAttribute("fullName"));
+      let si = html.querySelector("storyinfo");
+      updateInfo(si.getAttribute("title"), si.getAttribute("passages_quantity"), si.getAttribute("date_created"));
+      elem.setAttribute("active-story", si.getAttribute("fullName"));
     }
     elem.style.opacity = 1;
   },
@@ -33,10 +35,11 @@ const eventMap = {
   }
 };
 
-function updateInfo(title, passages) {
+function updateInfo(title, passages, created) {
   let e = document.querySelector('div.info-menu');
   e.querySelector('span[content="story_title"]').innerHTML = title;
   e.querySelector('span[content="passages_quantity"]').innerHTML = passages;
+  e.querySelector(`span[content="created"]`).innerHTML = created;
 }
 
 export async function spawnAll() {
@@ -51,18 +54,20 @@ export async function spawnAll() {
 export async function spawnStory(storyObj) { //to-do
   if (storyObj instanceof HawkStory) {
     try {
-      let data = await dataLib.read("data/html_assets/block_data/story_block.html");
+      let data = await getBlock("story_block");
       let el = document.createElement("div");
       el.classList.add("story_container");
       el.innerHTML = data;
       let html = el;
       html.hiddden = true;
       //setting info
+      console.log(storyObj);
       let info = html.querySelector("storyinfo");
       info.setAttribute("fullName", storyObj.fullName);
       info.setAttribute("title", storyObj.title);
       info.setAttribute("passages_quantity", storyObj.passages);
       info.setAttribute("story-id", storyObj.id);
+      info.setAttribute("date_created", storyObj.dateCreated);
       html.querySelector("span.real_title").innerHTML = storyObj.title;
       await lang.useLang(html);
 
