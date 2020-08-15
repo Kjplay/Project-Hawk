@@ -171,6 +171,7 @@ dataLib.direcotryEntries = function (dir) {
       checker(parsed);
       fs.readdir(parsed, (err, data) => {
         if (!err && data) return resolve(data);
+        console.log(err);
         reject(new Error("Error reading: \n" + dir));
       });
     }

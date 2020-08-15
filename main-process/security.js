@@ -1,9 +1,10 @@
 const {
   app
 } = require("electron");
+const path = require("path");
 
 var lib = {};
-
+const parsedPath = path.join(__dirname, "..");
 lib.enable = function () {
   app.on('web-contents-created', (_, contents) => {
     let ses = contents.session;
@@ -14,7 +15,7 @@ lib.enable = function () {
     }
     contents.on('will-navigate', (e, navigationUrl) => {
       const parsedUrl = new URL(navigationUrl)
-      if (!parsedUrl.startsWith(`file://${__dirname}`)) {
+      if (!parsedUrl.startsWith(parsedPath)) {
         e.preventDefault();
       }
     });
@@ -23,13 +24,13 @@ lib.enable = function () {
       delete webPreferences.preloadURL
       webPreferences.nodeIntegration = false
       webPreferences.enableRemoteModule = false;
-      if (!params.src.startsWith(`file://${__dirname}`)) {
+      if (!params.src.startsWith(parsedPath)) {
         e.preventDefault()
       }
     });
     contents.on('new-window', (event, navigationUrl) => {
       const parsedUrl = new URL(navigationUrl);
-      if (!parsedUrl.startsWith(`file://${__dirname}`)) {
+      if (!parsedUrl.startsWith(parsedPath)) {
         e.preventDefault();
       }
     });

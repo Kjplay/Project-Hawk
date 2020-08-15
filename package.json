@@ -9,6 +9,7 @@
   "icon": "build/app.ico",
   "scripts": {
     "start": "electron .",
+    "build": "electron-builder --config electron-builder-config.json",
     "build:win": "electron-builder --x64 --config electron-builder-config.json --win",
     "build:mac": "electron-builder --x64 --config electron-builder-config.json --mac",
     "build:linux": "electron-builder --x64 --config electron-builder-config.json --linux"
