@@ -14,6 +14,10 @@ var currentIndex = 1;
 var mainCover = false;
 const cached = {};
 //functions
+/**
+ * 
+ * @param {object} options 
+ */
 async function createPopUp(options) {
   options = options instanceof Object ? options : {};
   if (currentIndex === 1) {
@@ -76,6 +80,10 @@ async function createPopUp(options) {
   cover.style.zIndex = currentIndex;
   return cover;
 }
+/**
+ * 
+ * @param {string} name 
+ */
 async function closePopUp(name) {
   let mainC = document.getElementById("main_cover");
   let elem = document.querySelector(`div.cover[popUpName="${name}"]`);
@@ -101,6 +109,11 @@ async function closePopUp(name) {
     }, 190);
   }
 }
+/**
+ * 
+ * @param {string} text 
+ * @param {function}callback 
+ */
 async function popUp(text, callback) {
   let cover = await createPopUp({
     hasOkButton: true,
@@ -135,6 +148,12 @@ async function confirm(text, callback) {
     once: true
   });
 };
+/**
+ * 
+ * @param {string} name Name of an existiong popup 
+ * @param {string} message 
+ * @param {number} time 
+ */
 async function subSpecial(name, message, time) {
   time = typeof time === "number" ? time : 3000;
   for (let t of subTimeouts) {
@@ -171,6 +190,14 @@ async function subSpecial(name, message, time) {
     nr: nr
   });
 }
+/**
+ * 
+ * @param {string} htmlContent 
+ * @param {string} name 
+ * @param {Promise<boolean> | function} closePromise 
+ * @param {function} onStart 
+ * @async
+ */
 async function specialPop(htmlContent, name, closePromise, onStart) {
   if (!(name in cached)) {
     Object.defineProperty(cached, name, {
@@ -205,6 +232,10 @@ async function specialPop(htmlContent, name, closePromise, onStart) {
     });
   }
 };
+/**
+ * 
+ * @param {string} name 
+ */
 async function linkPop(name) {
   let dialogData;
   if (name in cached) {

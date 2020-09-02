@@ -19,7 +19,10 @@ const actionMap = {
 };
 Object.freeze(actionMap);
 
-
+/**
+ * 
+ * @param {HTMLElement} element 
+ */
 function init(element) { //selector can be: selector string, jquery object, html node object
   let dialogs = element.querySelectorAll("[dialog]");
   let p = element.querySelectorAll("[panel]");
@@ -39,6 +42,11 @@ function init(element) { //selector can be: selector string, jquery object, html
 }
 
 //handlers
+/**
+ * 
+ * @param {HTMLElement} element 
+ * @param {...Function}func 
+ */
 function resizeHandler(element, ...func) {
   return function handler(e) {
     if (element) {
@@ -91,15 +99,18 @@ function focusHandler(e) {
   }
   focusable[0].focus();
 }
-
-async function trapFocus(elem, soft, callback) {
+/**
+ * 
+ * @param {HTMLElement} elem 
+ */
+async function trapFocus(elem) {
   document.activeElement.blur();
   trapped = elem;
   focusable = elem.querySelectorAll("input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), object:not([disabled]), a[href], [tabindex]")
   document.addEventListener("keydown", focusHandler);
 };
 
-async function releaseFocus(noEnd) {
+async function releaseFocus() {
   document.removeEventListener("keydown", focusHandler);
   trapped = null;
 };

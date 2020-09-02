@@ -23,7 +23,14 @@ function on(...args) {
 function once(...args) {
   emitter.once(...args);
 }
-
+/**
+ * 
+ * @param {HTMLElement} elem 
+ * @param {string} name 
+ * @param {boolean} [isFirst=false] 
+ * @param {object=} configObj 
+ * @param {string=} configObj.transition
+ */
 async function directShow(elem, name, isFirst, configObj) {
   let {
     transition
@@ -56,6 +63,13 @@ async function directShow(elem, name, isFirst, configObj) {
   emitter.emit(`showed`, { name });
   return true;
 }
+/**
+ * 
+ * @param {string} name 
+ * @param {object=} configObj
+ * @param {boolean} configObj.forceLoad
+ * @param {string=} configObj.transition 
+ */
 async function showPanel(name, configObj) {
   configObj = utils.isObject(configObj) ? configObj : {};
   let {
@@ -91,8 +105,14 @@ async function showPanel(name, configObj) {
   }
   return true;
 }
-
-function awaitScript(src, h, module) {
+/**
+ * 
+ * @param {string} src 
+ * @param {HTMLElement} parent 
+ * @param {boolean} module 
+ * @returns {Promise<undefined>}
+ */
+function awaitScript(src, parent, module) {
   return new Promise(resolve => {
     if (!src) resolve();
     else {
@@ -101,18 +121,22 @@ function awaitScript(src, h, module) {
         resolve();
       }
       if (module) s.setAttribute("type", "module");
-      h.appendChild(s);
+      parent.appendChild(s);
       s.src = src;
-
     }
   })
 }
-
-function awaitAllScripts(scripts, h) {
+/**
+ * 
+ * @param {string[]} scripts 
+ * @param {HTMLElement} parent 
+ * @returns {Promise<undefined>}
+ */
+function awaitAllScripts(scripts, parent) {
   return new Promise(resolve => {
     let promises = [];
     for (let e of scripts) {
-      let p = awaitScript(e.src, h, e.module);
+      let p = awaitScript(e.src, parent, e.module);
       promises.push(p);
     }
     Promise.all(promises).then(() => {
@@ -120,6 +144,10 @@ function awaitAllScripts(scripts, h) {
     });
   });
 }
+/**
+ * 
+ * @param {string} name 
+ */
 async function preparePanel(name) {
   var panelData;
   let panelPath = await dataLib.exists(`data/html_assets/html_panels/${name}.html`) ? `${name}.html` : `${name}/index.html`
@@ -161,7 +189,10 @@ async function preparePanel(name) {
     elem: html
   };
 }
-
+/**
+ * 
+ * @param {string} name 
+ */
 function panelStackOn(name) {
   let i = panelStack.findIndex(e => e.name === name);
   if (i !== -1) panelStack.splice(i, 1);
@@ -170,7 +201,10 @@ function panelStackOn(name) {
     current: true
   });
 }
-
+/**
+ * 
+ * @param {string} name 
+ */
 function deletePanel(name) {
   let m = document.querySelector(`main[name="${name}"]`);
   if (m) m.remove();

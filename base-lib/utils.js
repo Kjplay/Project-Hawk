@@ -1,4 +1,9 @@
 var lib = {};
+/**
+ * @description Intended use await dealy(time) - just like sleep in C++
+ * @param {number} time
+ * @returns {Promise<boolean>} 
+ */
 lib.delay = function(time) {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
@@ -58,10 +63,20 @@ lib.merge = function(obj1, obj2) {
     }
     return obj1;
 };
+/**
+ * @param {object} e 
+ */
 lib.isObject = function(e) {
     return e instanceof Object && !(e instanceof Array) && typeof e !== "function";
 };
-lib.splice = function (string, idx, rem, str) {
+/**
+ * @description Same as Array.splice(), but for strings
+ * @param {string} string 
+ * @param {number} idx 
+ * @param {number} rem 
+ * @param {string} [str=""] 
+ */
+lib.splice = function (string, idx, rem, str="") {
     return string.slice(0, idx) + str + string.slice(idx + Math.abs(rem));
 };
 lib.stringTester = function(str, options) {

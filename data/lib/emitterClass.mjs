@@ -2,12 +2,20 @@ const utils = libs.req("utils");
 /*
 basic EventEmitter class bc when u exposeInMainWorld 'events' module it exposes empty object
 */
+/**
+ * @class Emitter
+ */
 export default class Emitter {
   constructor() {
     return this;
   }
   #emitFunctions = new Map();
   #onceEmit = new Map();
+  /**
+   * 
+   * @param {string} name 
+   * @param {function} handler 
+   */
   on (name, handler) {
     utils.assert([...arguments], ["string", "function"]);
     if (this.#emitFunctions.has(name)) {
@@ -16,6 +24,11 @@ export default class Emitter {
     } else this.#emitFunctions.set(name, [handler]);
     
   }
+  /**
+   * 
+   * @param {string} name 
+   * @param {function} handler
+   */
   once (name, handler) {
     utils.assert([...arguments], ["string", "function"]);
     if (this.#onceEmit.has(name)) {
@@ -23,6 +36,12 @@ export default class Emitter {
       this.#onceEmit.set(name, ar.push(handler));
     } else this.#onceEmit.set(name, [handler]);
   }
+
+  /**
+   * 
+   * @param {string} name 
+   * @param {...any} args 
+   */
   emit (name, ...args) {
     utils.assert([name], ["string"]);
     if (this.#emitFunctions.has(name)) {
@@ -33,6 +52,10 @@ export default class Emitter {
       this.#onceEmit.delete(name);
     }
   }
+  /**
+   * 
+   * @param {string} name 
+   */
   off (name) {
     utils.assert([name], ["string"]);
     if (this.#emitFunctions.has(name)) this.#emitFunctions.delete(name);
