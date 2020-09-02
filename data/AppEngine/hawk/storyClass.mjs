@@ -28,8 +28,8 @@ import EventEmitter from "../../lib/emitterClass.mjs";
 const allowedTagKeys = ["color"];
 const allowedPosKeys = ["color", "pointsArray"];
 const allowedPasKeys = ["tags", "positionGroups", "content"]; //name is the key here
-const allowedAttrKeys = ["title", "author", "author", "passages", "date_created", "id", "date_modified"];
-const allowedDataKeys = ["tags", "positionGroups", "passages"];
+const allowedAttrKeys = ["title", "author", "author", "passages", "date_created", "id", "date_modified", "hawk_version"];
+const allowedDataKeys = ["tags", "positionGroups", "passages", "grid"];
 //containers
 var selected = null;
 var container = {
@@ -44,6 +44,10 @@ export default class HawkStory {
   }
   #attributes = {}
   #data = {
+    grid: {
+      w: 4000,
+      h: 2000
+    },
     tags: {},
     passages: {},
     positionGroups: {}
@@ -59,6 +63,19 @@ export default class HawkStory {
     return this;
   }
   //basic attributes getters
+  getData() {
+    return {
+      id: this.id, 
+      fullName: this.fullName,
+      title: this.title,
+      passages: this.passages,
+      datemodified: this.dateModified,
+      datecreated: this.dateCreated
+    }
+  }
+  getGrid() {
+    return this.#data.grid;
+  }
   get id() {
     if (!this.#attributes.id) this.#attributes.id = helpers.randomString(24);
     return this.#attributes.id;
@@ -152,15 +169,13 @@ export default class HawkStory {
   static getSelected() { //we assume selected is cached
     return selected;
   }
-  static async getAll(useCache) { //attributes ONLY
-    useCache = typeof useCache !== "boolean" ? true : useCache;
+  static async getAll(useCache = true) { //attributes ONLY
     let cachedNames = [];
     if (useCache) cachedNames = Object.keys(container.stories);
     let names = await userData.getDirNames("stories");
     var out = {};
     for (let n of names) {
-      if (cachedNames.includes(n)) out[n] = container.stories[n];
-      else out[n] = await HawkStory.#loadOneAttrsFromDir(n);
+      out[n] = cachedNames.includes(n) ? container.stories[n] : await HawkStory.#loadOneAttrsFromDir(n);
     }
     return out;
   }
@@ -214,68 +229,63 @@ export default class HawkStory {
     if (name in this.#data.tags) delete this.#data.tags[name];
   }
   //validate functions
-  #validateAttributes = attrs => { //not all attributes are required
+  #validateAttributes(attrs) { //not all attributes are required
     return utils.isObject(attrs) && Object.keys(attrs).every(e => allowedAttrKeys.includes(e));
   }
-  #validateData = data => {
+  #validateData(data) {
     return utils.isObject(data) && allowedDataKeys.every(k => k in data) && this.#validateTags(data.tags) && this.#validatePositionGroups(data.positionGroups) && this.#validatePassages(data.passages);
   }
-  #validatePassages = pasObj => {
+  #validatePassages(pasObj) {
     if (!utils.isObject(pasObj)) return false;
     for (let p in pasObj) if (!this.#validatePassage(p)) return false;
     return true;
   }
-  #validateTags = tagsObj => {
+  #validateTags(tagsObj) {
     if (!utils.isObject(tagsObj)) return false;
     for (let t in tagsObj) if (!this.#validateTag(t)) return false;
     return true;
   }
-  #validatePositionGroups = posObj => {
+  #validatePositionGroups(posObj) {
     if (!utils.isObject(posObj)) return false;
     for (let p in posObj) if (!this.#validatePositionGroup(p)) return false;
     return true;
   }
-  #validatePassage = pasObj => {
+  #validatePassage(pasObj) {
     return utils.isObject(pasObj) && allowedPasKeys.every(pasKey => pasKey in pasObj) && Object.keys(pasObj).length === allowedPasKeys.length && pasObj.positionGroups.every(p => p in this.#data.positionGroups) && pasObj.tags.every(t => t in this.#data.tags) && typeof pasObj.content === "string";
   }
-  #validateTag = tagObj => {
+  #validateTag(tagObj) {
     return utils.isObject(tagObj) && allowedTagKeys.every(tagKey => tagKey in tagObj) && Object.keys(tagObj).length === allowedTagKeys.length;
   }
-  #validatePositionGroup = posGroup => {
+  #validatePositionGroup(posGroup) {
     return utils.isObject(posGroup) && allowedPosKeys.every(posKey => posKey in posGroup) && posGroup.pointsArray.every(point => this.#validatePoint(point)) && Object.keys(posGroup).length === allowedPosKeys.length;
   }
-  #validatePoint = point => {
+  #validatePoint(point) {
     return Array.isArray(point) && point.length === 2 && point.every(n => typeof n === "number");
   }
   //private utils
-  #applyData = data => {
+  #applyData(data) {
     if (this.#validateData(data)) this.#data = data;
     this.#recalculateAttrs();
   }
-  #applyAttrs = attrs => {
-    console.log(attrs);
+  #applyAttrs(attrs) {
     if (this.#validateAttributes(attrs)) {
-      console.log("validated");
       for (let key in attrs) if (typeof attrs[key] === "string") attrs[key].trim();
       this.#attributes = attrs;
+      if (this.#attributes.date_modified) this.#attributes.date_modified = new Date(this.#attributes.date_modified);
+      if (this.#attributes.date_created) this.#attributes.date_created = new Date(this.#attributes.date_created);
     };
-    if (this.#attributes.date_modified) this.#attributes.date_modified = new Date(this.#attributes.date_modified);
-    if (this.#attributes.date_created) this.#attributes.date_created = new Date(this.#attributes.date_created);
   }
-  #recalculateAttrs = () => {
+  #recalculateAttrs() {
     this.#attributes.passages = Object.keys(this.#data.passages).length;
     this.#attributes.date_modified = new Date();
   }
-  #updateAttrs = () => {
+  #updateAttrs() {
     this.#attributes.passages = this.#attributes.passages ? this.#attributes.passages : Object.keys(this.#data.passages).length;
     this.#attributes.date_created = this.#attributes.date_created ?  this.#attributes.date_created : new Date();
     this.#attributes.date_modified = new Date();
   }
-  static #loadOneAttrsFromDir = async (dir) => {
+  static async #loadOneAttrsFromDir(dir)  {
     let attrs = await userData.requireJSON(`stories/${dir}/attributes.json`);
-    console.log(attrs);
-    let s = new HawkStory(attrs); //cache
-    console.log(s);
-    return s;
+    return new HawkStory(attrs); //cache
   }
 }

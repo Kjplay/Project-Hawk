@@ -5,6 +5,7 @@ import * as lang from "../lib/check-lang.mjs";
 import * as panels from "../lib/panels.mjs";
 import getBlock from "../lib/block.mjs";
 const utils = libs.req("utils");
+const at = ["id","fullName" ,"title","passages","dateModified","dateCreated"];
 let cont = {}; //for html updates
 const eventMap = {
   deleter: (e, html) => {
@@ -24,7 +25,12 @@ const eventMap = {
     let elem = document.querySelector("div.info-menu");
     if (elem.getAttribute("active-story") !== storyObj.fullName) {
       let si = html.querySelector("storyinfo");
-      updateInfo(si.getAttribute("title"), si.getAttribute("passages_quantity"), si.getAttribute("date_created"));
+      let data = {};
+      for (let a of at) {
+        let attr = si.getAttribute("story_"+a);
+        if (attr) data[a] = attr;
+      }
+      updateInfo(data);
       elem.setAttribute("active-story", si.getAttribute("fullName"));
     }
     elem.style.opacity = 1;
@@ -35,11 +41,12 @@ const eventMap = {
   }
 };
 
-function updateInfo(title, passages, created) {
+function updateInfo(obj) {
   let e = document.querySelector('div.info-menu');
-  e.querySelector('span[content="story_title"]').innerHTML = title;
-  e.querySelector('span[content="passages_quantity"]').innerHTML = passages;
-  e.querySelector(`span[content="created"]`).innerHTML = created;
+  for (let key of Object.keys(obj)) {
+    let el = e.querySelector(`span[content="story_${key}"]`);
+    if (el) el.innerHTML = obj[key];
+  }
 }
 
 export async function spawnAll() {
@@ -61,13 +68,9 @@ export async function spawnStory(storyObj) { //to-do
       let html = el;
       html.hiddden = true;
       //setting info
-      console.log(storyObj);
       let info = html.querySelector("storyinfo");
-      info.setAttribute("fullName", storyObj.fullName);
-      info.setAttribute("title", storyObj.title);
-      info.setAttribute("passages_quantity", storyObj.passages);
-      info.setAttribute("story-id", storyObj.id);
-      info.setAttribute("date_created", storyObj.dateCreated);
+      let attrs = storyObj.getData();
+      for (let key of Object.keys(attrs)) info.setAttribute("story_"+key, attrs[key]);
       html.querySelector("span.real_title").innerHTML = storyObj.title;
       await lang.useLang(html);
 
@@ -116,7 +119,7 @@ export async function createAndSave(attrs, data) {
   return s;
 }
 export async function despawnAndDelete(element) {
-  let result = await HawkStory.delete(element.querySelector("storyinfo").getAttribute("fullName"));
+  let result = await HawkStory.delete(element.querySelector("storyinfo").getAttribute("story_fullname"));
   if (result) {
     element.parentNode.style.animation = "fadeInAndScale 0.4s ease reverse";
     setTimeout(function () {

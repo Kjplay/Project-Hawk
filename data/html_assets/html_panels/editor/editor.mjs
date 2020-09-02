@@ -3,7 +3,7 @@ import * as panels from "../../../lib/panels.mjs";
 function EditStory() {
     let s = HawkStory.getSelected();
     if (s) {
-        document.querySelector("#fullName").innerHTML = s.fullName;
+        document.querySelector('[content="title"]').innerHTML = s.title;
     }
 }
 panels.on("showing", e => {
