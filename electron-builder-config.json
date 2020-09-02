@@ -21,7 +21,7 @@
 		"target": "dmg"
     },
     "linux": {
-        "target": "deb",
+        "target": "pacman",
         "category": "Development"
     }
 }

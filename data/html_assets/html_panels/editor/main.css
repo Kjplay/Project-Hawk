@@ -1,3 +1,8 @@
 main[name="editor"] {
     overflow: hidden;
 }
+div[area="editor-grid"] {
+    width: 100%;
+    height: calc(100% - 113px);
+    background: url("./grid-bg.svg");
+}

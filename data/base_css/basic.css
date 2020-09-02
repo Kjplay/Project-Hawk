@@ -74,6 +74,14 @@ html, body, control-frame, #size {
   border-bottom: solid 5px var(--main-color);
   padding: 10px 5px 10px 5px;
 }
+.bottomBar {
+  position: relative;
+  min-width: 100%;
+  max-width: 100%;
+  height: 30px;
+  border-top: solid 5px var(--main-color);
+  padding: 10px 5px 10px 5px;
+}
 .center {
   display: block;
   margin: auto;

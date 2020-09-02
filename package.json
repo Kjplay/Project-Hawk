@@ -1,5 +1,5 @@
 {
-  "name": "project_hawk",
+  "name": "projecthawk",
   "productName": "Project Hawk",
   "version": "0.2.2",
   "description": "Text-game engine (similar to Twine 2)",
@@ -27,7 +27,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "electron": "^9.2.0",
+    "electron": "^10.1.0",
     "electron-builder": "^22.8.0"
   }
 }
