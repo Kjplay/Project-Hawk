@@ -2,12 +2,14 @@ import * as dialog from "../../../lib/pop-main.mjs";
 import * as storyLib from "../../../AppEngine/story-main.mjs";
 
 function onStart(element, close) {
-    element.querySelector('input[name="newStoryTitle"]').focus();
-    element.querySelector('input[name="newStoryTitle"]').addEventListener("keydown", e => {
-        if (e.key == "Enter") element.querySelector('button[name="create_story"]').click();
+    let inp = element.querySelector('input[name="newStoryTitle"]');
+    let btn_ok = element.querySelector('button[name="create_story"]');
+    inp.focus();
+    inp.addEventListener("keydown", e => {
+        if (e.key == "Enter") btn_ok.click();
     });
-    element.querySelector('button[name="create_story"]').addEventListener("click" , async function() {
-        let elem = element.querySelector('input[name="newStoryTitle"]');
+    btn_ok.addEventListener("click" , async function() {
+        let elem = inp;
         let value = elem.value;
         if (value == "") {
             dialog.subSpecial("new_story", "[lang: Give_title]!");
